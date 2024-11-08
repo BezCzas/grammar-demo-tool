@@ -31,7 +31,7 @@ Return the result in JSON format:
 **Output**:
 {
   "original_sentence": "I am reading a book.",
-  "timeless_sentence": "I struggle-read-enjoy the book."
+  "timeless_sentence": "I am struggling-reading-enjoying the book."
 }
 
 **Input**: Como una deliciosa cena.
@@ -46,5 +46,6 @@ Return the result in JSON format:
 
 Make sure that:
 - The verbs added are causally or emotionally linked to the original action.
+- All verbs in the output sentences are in the present tense. For English, they should be in the present continuous tense.
 - Use verbs that express nuanced emotions, reactions, or causality.
 - Apply the output in the same language as the input, and structure all verbs with hyphens to create a cohesive string.

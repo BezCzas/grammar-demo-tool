@@ -3,6 +3,7 @@ import openai
 import os
 from pydantic import BaseModel, Field
 from typing import List, Literal
+import concurrent.futures
 
 
 # Ustaw klucz API OpenAI
@@ -52,18 +53,28 @@ def call_llm(system_prompt, sentence, validation_class):
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": sentence}
         ],
-        response_format=validation_class
+        response_format=validation_class,
+        temperature=0.2
     )
     return response
 
+def translate_sentence():
+    return call_llm(grammars[selected_grammar], zdanie_do_przetlumaczenia, Translation)
+
+def select_grammars():
+    return call_llm(grammar_selector_prompt, zdanie_do_przetlumaczenia, SentenceGrammar)
 
 # Przycisk "tłumacz"
 if st.button("tłumacz"):
     if zdanie_do_przetlumaczenia.strip():
-        translation = call_llm(grammars[selected_grammar], zdanie_do_przetlumaczenia, Translation)
-        przetlumaczone_zdanie = translation.choices[0].message.parsed.timeless_sentence
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future_translation = executor.submit(translate_sentence)
+            future_grammars = executor.submit(select_grammars)
 
-        applicable_grammars = call_llm(grammar_selector_prompt, zdanie_do_przetlumaczenia, SentenceGrammar)
+            translation = future_translation.result()
+            applicable_grammars = future_grammars.result()
+
+        przetlumaczone_zdanie = translation.choices[0].message.parsed.timeless_sentence
         applicable_grammars = applicable_grammars.choices[0].message.parsed.applicable_grammars
     else:
         przetlumaczone_zdanie = "Proszę wpisać zdanie do przetłumaczenia."
